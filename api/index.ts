@@ -1,13 +1,9 @@
-const gqlTools = require('graphql-tools')
+const gqlTools = require('graphql-tools');
 import * as express from 'express';
 import { Server }  from 'http';
 import { apolloExpress, graphiqlExpress } from 'apollo-server';
-import { urlencoded, json } from 'body-parser';
-import * as cookieParser from 'cookie-parser';
-import * as compress from 'compression';
+import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
-import * as methodOverride from 'method-override';
-import * as logger from 'morgan';
 import * as dotenv from 'dotenv';
 
 import Schema from './schema';
@@ -31,28 +27,20 @@ class GraphQLServer {
   constructor(
     private app = express(),
     private ENV = process.env.NODE_ENV || 'development',
-    private PORT: number = process.env.PORT || 8080,
-    private GRAPHQL_PORT: number = process.env.GRAPHQL_PORT || 8888) {
+    private PORT: number = process.env.PORT || 8888) {
     this.setMiddleWare();
     this.setRoutes();
   }
 
   private setMiddleWare(): void {
-    this.app.use(compress())
+    this.app.options('*', cors())
       .set('env', this.ENV)
       .set('port', this.PORT)
-      .set('graphQLPort', this.GRAPHQL_PORT)
-      .options('*', cors())
-      .use(cors())
-      .use(urlencoded( { extended: true }))
-      .use(json())
-      .use(cookieParser())
-      .use(methodOverride())
-      .use(logger('dev'));
+      .use(cors());
   }
 
   private setRoutes(): void {
-    this.app.use('/graphql', json(), apolloExpress({
+    this.app.use('/graphql', bodyParser.json(), apolloExpress({
       schema: executableSchema,
       context: {},
     }))
@@ -62,9 +50,9 @@ class GraphQLServer {
   }
 
   startServer(): Server {
-    return this.app.listen( this.GRAPHQL_PORT, () => {
-      console.log( `GraphQL server listening on port ${this.GRAPHQL_PORT}` );
-    });
+    return this.app.listen( this.PORT, () => console.log(
+      `GraphQL Server is now running on http://localhost:${this.PORT}/graphql`
+    ));
   }
 }
 

@@ -1,5 +1,5 @@
 const Resolvers = {
-  RootQuery: {}
+  Query: {}
 };
 
 export default Resolvers;
